@@ -107,7 +107,7 @@ export default function Home() {
       <BackgroundCollage />
       
       <motion.h1
-        className="text-4xl md:text-6xl font-bold mb-4 pixel-font neon-purple-text relative z-10"
+        className="text-4xl md:text-6xl mt-20 font-bold mb-4 pixel-font neon-purple-text relative z-10"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
