@@ -1,6 +1,6 @@
 node_modules
 .env
-
+.next
 # Hardhat files
 /cache
 /artifacts
