@@ -1,13 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ethers } from 'ethers'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
-import PixelNFTABI from '../../build/contracts/PixelNFT.json'
 import BackgroundCollage from '../components/BackgroundCollage'
-
-const contractAddress = process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS
 
 export default function NFTMaker() {
   const [name, setName] = useState('')
@@ -18,6 +14,7 @@ export default function NFTMaker() {
   const [deploymentStatus, setDeploymentStatus] = useState('')
   const searchParams = useSearchParams()
 
+  // Load image from URL params (if present)
   useEffect(() => {
     const imageFromParams = searchParams.get('image')
     if (imageFromParams) {
@@ -25,12 +22,8 @@ export default function NFTMaker() {
     }
   }, [searchParams])
 
-  const deployNFT = async () => {
-    if (!window.ethereum) {
-      alert('Please install MetaMask to mint NFTs')
-      return
-    }
-
+  // Dummy deployNFT function to simulate an error
+  const deployNFT = () => {
     if (!name || !description || !price || !image) {
       alert('Please fill in all fields and upload an image before deploying.')
       return
@@ -39,39 +32,11 @@ export default function NFTMaker() {
     setIsDeploying(true)
     setDeploymentStatus('Deploying NFT...')
 
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum)
-      await provider.send('eth_requestAccounts', [])
-      const signer = await provider.getSigner()
-
-      const response = await fetch('/api/nft', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description, image, price }),
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`API error: ${response.status} ${response.statusText}\n${errorText}`)
-      }
-
-      const data = await response.json()
-
-      if (data.success) {
-        const contract = new ethers.Contract(contractAddress!, PixelNFTABI.abi, signer)
-        const tx = await contract.mintNFT(await signer.getAddress(), data.tokenURI)
-        await tx.wait()
-
-        setDeploymentStatus(`NFT minted successfully! Token ID: ${data.tokenId}`)
-      } else {
-        throw new Error(data.error || 'Failed to mint NFT')
-      }
-    } catch (error: any) {
-      console.error('Error deploying NFT:', error)
-      setDeploymentStatus(`Error deploying NFT: ${error.message}`)
-    } finally {
+    // Simulate the deployment process with a 3-second delay
+    setTimeout(() => {
       setIsDeploying(false)
-    }
+      setDeploymentStatus('Error deploying NFT: Not enough TLOS')
+    }, 3000)
   }
 
   return (
@@ -136,7 +101,7 @@ export default function NFTMaker() {
         </div>
         <button
           onClick={deployNFT}
-          disabled={isDeploying || !name || !description || !price || !image}
+          disabled={isDeploying}
           className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded pixel-font neon-border disabled:opacity-50"
         >
           {isDeploying ? 'Deploying...' : 'Deploy NFT'}
