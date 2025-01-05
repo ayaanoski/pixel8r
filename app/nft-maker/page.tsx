@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import BackgroundCollage from '../components/BackgroundCollage'
+
+const DynamicImage = dynamic(() => import('next/image'), { ssr: false })
 
 export default function NFTMaker() {
   const [name, setName] = useState('')
@@ -12,15 +13,15 @@ export default function NFTMaker() {
   const [image, setImage] = useState<string | null>(null)
   const [isDeploying, setIsDeploying] = useState(false)
   const [deploymentStatus, setDeploymentStatus] = useState('')
-  const searchParams = useSearchParams()
 
-  // Load image from URL params (if present)
+  // Load image from URL params on the client side
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search)
     const imageFromParams = searchParams.get('image')
     if (imageFromParams) {
       setImage(decodeURIComponent(imageFromParams))
     }
-  }, [searchParams])
+  }, [])
 
   // Dummy deployNFT function to simulate an error
   const deployNFT = () => {
@@ -81,6 +82,7 @@ export default function NFTMaker() {
               id="image"
               accept="image/*"
               onChange={(e) => {
+                if (typeof window === 'undefined') return
                 const file = e.target.files?.[0]
                 if (file) {
                   const reader = new FileReader()
@@ -95,7 +97,7 @@ export default function NFTMaker() {
           )}
           {image && (
             <div className="mt-2">
-              <Image src={image} alt="NFT Preview" width={300} height={300} className="rounded" />
+              <DynamicImage src={image} alt="NFT Preview" width={300} height={300} className="rounded" />
             </div>
           )}
         </div>
