@@ -1,0 +1,8 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/pixelate/page": "app/pixelate/page.js",
+  "/marketplace/page": "app/marketplace/page.js",
+  "/nft-maker/page": "app/nft-maker/page.js",
+  "/page": "app/page.js",
+  "/marketplace/[id]/page": "app/marketplace/[id]/page.js"
+}
