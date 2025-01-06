@@ -2,6 +2,8 @@
 
 Pixel8r is a decentralized NFT creation and marketplace platform built using Next.js, Solidity smart contracts, and a suite of modern web technologies. It allows users to create pixel art NFTs, list them on a marketplace, and manage their collections, all while leveraging blockchain technology for ownership and transparency.
 
+## Live Demo: https://pixel8r.vercel.app
+
 ## Features
 - **NFT Maker**: Create unique pixel art NFTs directly from the platform.
 - **Marketplace**: Browse, buy, and sell NFTs in a decentralized marketplace.
