@@ -1,19 +1,20 @@
-// app/marketplace/[id]/page.tsx
-'use client'
-
-import { useParams } from 'next/navigation'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
+'use client';
+import React from 'react';
+import { useParams } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { fontFamily } from 'html2canvas/dist/types/css/property-descriptors/font-family';
 
 interface NFT {
-  id: number
-  name: string
-  description: string
-  price: number
-  image: string
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
 }
-
 const mockNFTs: NFT[] = [
   {
     id: 1,
@@ -102,16 +103,88 @@ const mockNFTs: NFT[] = [
 ]
 
 export default function NFTPage() {
-  const params = useParams()
-  const id = typeof params.id === 'string' ? parseInt(params.id) : null
-  const [nft, setNFT] = useState<NFT | null>(null)
+  const params = useParams();
+  const id = typeof params.id === 'string' ? parseInt(params.id) : null;
+  const [nft, setNFT] = useState<NFT | null>(null);
 
   useEffect(() => {
     if (id) {
-      const selectedNFT = mockNFTs.find((n) => n.id === id)
-      setNFT(selectedNFT || null)
+      const selectedNFT = mockNFTs.find((n) => n.id === id);
+      setNFT(selectedNFT || null);
     }
-  }, [id])
+  }, [id]);
+
+  const handleBuyNFT = () => {
+    alert(`Processing purchase of ${nft?.name} for ${nft?.price} TLOS`);
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!nft) return;
+    
+    const element = document.getElementById('nft-card');
+    if (!element) return;
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Set black background
+      pdf.setFillColor(0, 0, 0);
+      pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight(), 'F');
+
+      // Get dimensions
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      // Calculate dimensions for centering
+      const margin = 20; // 20mm margin
+      const maxWidth = pageWidth - (2 * margin);
+      const maxHeight = pageHeight - (2 * margin) - 15; // Leave space for signature
+
+      // Scale image to fit within margins while maintaining aspect ratio
+      const imgRatio = canvas.width / canvas.height;
+      let imgWidth = maxWidth;
+      let imgHeight = imgWidth / imgRatio;
+
+      if (imgHeight > maxHeight) {
+        imgHeight = maxHeight;
+        imgWidth = imgHeight * imgRatio;
+      }
+
+      // Calculate positions to center image
+      const xPos = (pageWidth - imgWidth) / 2;
+      const yPos = (pageHeight - imgHeight - 15) / 2;
+
+      // Add image
+      pdf.addImage(
+        canvas.toDataURL('image/png'),
+        'PNG',
+        xPos,
+        yPos,
+        imgWidth,
+        imgHeight
+      );
+
+      // Add signature in white color
+      pdf.setTextColor(255, 255, 255); // Set text color to white
+      pdf.setFontSize(12);
+      pdf.text('-from Vinsmoke', xPos + imgWidth - 40, yPos + imgHeight + 10 );
+      
+      pdf.save(`${nft.name}-details.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF. Please try again.');
+    }
+  };
 
   if (!nft) {
     return (
@@ -124,11 +197,7 @@ export default function NFTPage() {
           Back to Marketplace
         </Link>
       </div>
-    )
-  }
-
-  const handleBuyNFT = () => {
-    alert(`Processing purchase of ${nft.name} for ${nft.price} TLOS`)
+    );
   }
 
   return (
@@ -143,7 +212,7 @@ export default function NFTPage() {
           </Link>
         </nav>
 
-        <div className="flex flex-col md:flex-row gap-10 bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 p-8 rounded-lg shadow-2xl">
+        <div id="nft-card" className="flex flex-col md:flex-row gap-10 bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 p-8 rounded-lg shadow-2xl">
           <div className="md:w-1/2">
             <Image
               src={nft.image}
@@ -170,13 +239,22 @@ export default function NFTPage() {
               </div>
             </div>
             
-            <button
-              onClick={handleBuyNFT}
-              className="w-full bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 text-white font-bold py-4 px-6 rounded-lg pixel-font shadow-xl hover:opacity-90 transition duration-300 flex items-center justify-center gap-3"
-            >
-              <span>Buy Now</span>
-              <span className="text-sm">({nft.price} TLOS)</span>
-            </button>
+            <div className="space-y-4">
+              <button
+                onClick={handleBuyNFT}
+                className="w-full bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 text-white font-bold py-4 px-6 rounded-lg pixel-font shadow-xl hover:opacity-90 transition duration-300 flex items-center justify-center gap-3"
+              >
+                <span>Buy Now</span>
+                <span className="text-sm">({nft.price} TLOS)</span>
+              </button>
+
+              <button
+                onClick={handleDownloadPDF}
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-4 px-6 rounded-lg pixel-font shadow-xl hover:opacity-90 transition duration-300 flex items-center justify-center gap-3"
+              >
+                <span>Download NFT details</span>
+              </button>
+            </div>
             
             <div className="mt-8 p-6 bg-indigo-50 rounded-lg border-l-4 border-purple-500">
               <h2 className="text-2xl font-bold mb-4 pixel-font text-indigo-800">NFT Details</h2>
@@ -191,5 +269,5 @@ export default function NFTPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
