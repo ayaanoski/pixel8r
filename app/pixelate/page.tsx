@@ -2,12 +2,15 @@
 
 import { useState, useRef, useEffect } from 'react'
 import BackgroundCollage from '../components/BackgroundCollage'
+import Confetti from 'react-confetti'
+
 
 export default function Pixelate() {
   const [originalImage, setOriginalImage] = useState<string | null>(null)
   const [pixelatedImage, setPixelatedImage] = useState<string | null>(null)
   const [sliderPosition, setSliderPosition] = useState(50)
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 })
+  const [showConfetti, setShowConfetti] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const sliderRef = useRef<HTMLDivElement>(null)
 
@@ -81,6 +84,9 @@ export default function Pixelate() {
       }
 
       setPixelatedImage(canvas.toDataURL())
+      setShowConfetti(true)
+      // Hide confetti after 5 seconds
+      setTimeout(() => setShowConfetti(false), 5000)
     }
     img.src = originalImage
   }
@@ -125,6 +131,16 @@ export default function Pixelate() {
 
   return (
     <div className="min-h-screen bg-gray-900 overflow-hidden">
+       {showConfetti && (
+        <Confetti
+          width={window.innerWidth}
+          height={window.innerHeight}
+          recycle={false}
+          numberOfPieces={200}
+          gravity={0.3}
+          colors={['#4ade80', '#60a5fa', '#f472b6', '#fbbf24']}
+        />
+      )}
       <div className="relative flex flex-col items-center px-4 py-6 sm:p-8 max-w-6xl mx-auto">
         <div className="absolute inset-0 z-0">
           <BackgroundCollage />
