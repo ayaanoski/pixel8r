@@ -1,10 +1,12 @@
+// Profile.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { ethers } from 'ethers'
 import WalletCard from '../components/WalletCard'
 import BackgroundCollage from '../components/BackgroundCollage'
+import html2canvas from 'html2canvas'
 
 declare global {
   interface Window {
@@ -21,6 +23,8 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [customAvatar, setCustomAvatar] = useState<string | null>(null)
+
+  const walletCardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -84,8 +88,9 @@ export default function Profile() {
     if (e.target.files && e.target.files[0]) {
       const reader = new FileReader()
       reader.onload = (event) => {
-        setCustomAvatar(event.target?.result as string)
-        setAvatar(event.target?.result as string)
+        const result = event.target?.result as string
+        setCustomAvatar(result)
+        setAvatar(result)
       }
       reader.readAsDataURL(e.target.files[0])
     }
@@ -103,15 +108,42 @@ export default function Profile() {
     setIsEditing(false)
   }
 
+  // Download WalletCard as PNG
+  const downloadWalletCard = async () => {
+    if (walletCardRef.current) {
+      try {
+        const canvas = await html2canvas(walletCardRef.current, {
+          backgroundColor: null, // Ensures transparent background
+          scale: 2, // High resolution
+        })
+        const image = canvas.toDataURL('image/png')
+        const link = document.createElement('a')
+        link.href = image
+        link.download = 'wallet-card.png'
+        link.click()
+      } catch (error) {
+        console.error('Error generating image:', error)
+      }
+    }
+  }
+
   return (
-    <div className="flex flex-col items-center p-8 max-w-4xl mx-auto">
+    <div className="flex flex-col items-center p-4 sm:p-8 max-w-4xl mx-auto">
       <BackgroundCollage />
-      <h1 className="text-4xl font-bold mb-8 pixel-font neon-text">Profile</h1>
+      <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-8 pixel-font neon-text">Profile</h1>
       {!isEditing ? (
-        <div className="w-full max-w-2xl mt-20">
-          <WalletCard username={username} avatar={avatar} walletAddress={walletAddress} />
-          <div className="mt-8 space-y-4 flex flex-col items-center">
-            <button onClick={handleEdit} className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg pixel-font neon-border transition-all duration-300 w-full max-w-xs">
+        <div className="w-full max-w-2xl mt-8 sm:mt-20">
+          <WalletCard
+            ref={walletCardRef}
+            username={username}
+            avatar={avatar}
+            walletAddress={walletAddress}
+          />
+          <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4 flex flex-col items-center">
+            <button
+              onClick={handleEdit}
+              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg pixel-font neon-border transition-all duration-300 w-full max-w-xs"
+            >
               Edit Profile
             </button>
             {!walletAddress ? (
@@ -119,28 +151,36 @@ export default function Profile() {
                 <button
                   onClick={connectWallet}
                   disabled={isLoading}
-                  className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg pixel-font neon-border transition-all duration-300 w-full disabled:opacity-50"
+                  className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg pixel-font neon-border transition-all duration-300 w-full disabled:opacity-50"
                 >
                   {isLoading ? 'Connecting...' : 'Connect Wallet'}
                 </button>
                 {errorMessage && (
-                  <p className="text-red-500 pixel-font text-sm mt-2">{errorMessage}</p>
+                  <p className="text-red-500 pixel-font text-sm mt-2 break-words">{errorMessage}</p>
                 )}
               </div>
             ) : (
               <button
                 onClick={disconnectWallet}
-                className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg pixel-font neon-border transition-all duration-300 w-full max-w-xs"
+                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg pixel-font neon-border transition-all duration-300 w-full max-w-xs"
               >
                 Disconnect Wallet
               </button>
             )}
+            <button
+              onClick={downloadWalletCard}
+              className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg pixel-font neon-border transition-all duration-300 w-full max-w-xs mt-4"
+            >
+              Download Wallet Card
+            </button>
           </div>
         </div>
       ) : (
-        <div className="w-full max-w-md bg-gray-800 p-8 rounded-lg shadow-lg neon-border">
-          <div className="mb-6">
-            <label htmlFor="username" className="block mb-2 pixel-font neon-text">Username:</label>
+        <div className="w-full max-w-md bg-gray-800 p-4 sm:p-8 rounded-lg shadow-lg neon-border mt-8 sm:mt-0">
+          <div className="mb-4 sm:mb-6">
+            <label htmlFor="username" className="block mb-2 pixel-font neon-text">
+              Username:
+            </label>
             <input
               type="text"
               id="username"
@@ -149,35 +189,54 @@ export default function Profile() {
               className="border rounded px-3 py-2 w-full pixel-font bg-black text-white"
             />
           </div>
-          <div className="mb-6">
-            <label htmlFor="avatar" className="block mb-2 pixel-font neon-text">Avatar:</label>
-            <div className="flex flex-wrap justify-center gap-4 mb-4">
-              {['/assets/1.png', '/assets/2.png', '/assets/3.png', '/assets/4.png'].map((avatarOption, index) => (
-                <div key={index} className="cursor-pointer">
+          <div className="mb-4 sm:mb-6">
+            <label htmlFor="avatar" className="block mb-2 pixel-font neon-text">
+              Avatar:
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4">
+              {['/assets/1.png', '/assets/2.png', '/assets/3.png', '/assets/4.png'].map(
+                (avatarOption, index) => (
+                  <div key={index} className="cursor-pointer flex justify-center">
+                    <Image
+                      src={avatarOption}
+                      alt={`Avatar ${index + 1}`}
+                      width={80}
+                      height={80}
+                      className={`rounded-full transition-all duration-300 ${
+                        avatar === avatarOption
+                          ? 'border-4 border-blue-500 scale-110'
+                          : 'hover:scale-105'
+                      }`}
+                      onClick={() => handleAvatarSelect(avatarOption)}
+                    />
+                  </div>
+                )
+              )}
+              {customAvatar && (
+                <div className="cursor-pointer flex justify-center">
                   <Image
-                    src={avatarOption}
-                    alt={`Avatar ${index + 1}`}
+                    src={customAvatar}
+                    alt="Custom Avatar"
                     width={80}
                     height={80}
-                    className={`rounded-full transition-all duration-300 ${avatar === avatarOption ? 'border-4 border-blue-500 scale-110' : 'hover:scale-105'}`}
-                    onClick={() => handleAvatarSelect(avatarOption)}
+                    className={`rounded-full transition-all duration-300 ${
+                      avatar === customAvatar ? 'border-4 border-blue-500 scale-110' : 'hover:scale-105'
+                    }`}
+                    onClick={() => handleAvatarSelect(customAvatar)}
                   />
                 </div>
-              ))}
-              {customAvatar && (
-                <Image
-                  src={customAvatar}
-                  alt="Custom Avatar"
-                  width={80}
-                  height={80}
-                  className={`rounded-full transition-all duration-300 ${avatar === customAvatar ? 'border-4 border-blue-500 scale-110' : 'hover:scale-105'}`}
-                  onClick={() => handleAvatarSelect(customAvatar)}
-                />
               )}
             </div>
-            <input type="file" onChange={handleCustomAvatarUpload} className="mt-2 text-white pixel-font" />
+            <input
+              type="file"
+              onChange={handleCustomAvatarUpload}
+              className="mt-2 text-white pixel-font text-sm sm:text-base w-full"
+            />
           </div>
-          <button onClick={handleSave} className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg pixel-font neon-border transition-all duration-300 w-full">
+          <button
+            onClick={handleSave}
+            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg pixel-font neon-border transition-all duration-300 w-full"
+          >
             Save Changes
           </button>
         </div>
@@ -185,4 +244,3 @@ export default function Profile() {
     </div>
   )
 }
-
