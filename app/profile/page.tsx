@@ -7,6 +7,7 @@ import { ethers } from 'ethers'
 import WalletCard from '../components/WalletCard'
 import BackgroundCollage from '../components/BackgroundCollage'
 import html2canvas from 'html2canvas'
+import { motion } from 'framer-motion'
 
 declare global {
   interface Window {
@@ -140,12 +141,14 @@ export default function Profile() {
             walletAddress={walletAddress}
           />
           <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4 flex flex-col items-center">
-            <button
+            <motion.button
               onClick={handleEdit}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg pixel-font neon-border transition-all duration-300 w-full max-w-xs"
+              className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold py-3 px-6 rounded-full pixel-font transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg hover:from-cyan-500 hover:to-blue-500"
+              whileHover={{ scale: 1.1, rotate: 1 }}
+              whileTap={{ scale: 0.95, rotate: -1 }}
             >
               Edit Profile
-            </button>
+            </motion.button>
             {!walletAddress ? (
               <div className="w-full max-w-xs">
                 <button
@@ -160,19 +163,23 @@ export default function Profile() {
                 )}
               </div>
             ) : (
-              <button
+              <motion.button
                 onClick={disconnectWallet}
-                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg pixel-font neon-border transition-all duration-300 w-full max-w-xs"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-6 rounded-full pixel-font transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg hover:from-pink-500 hover:to-purple-500"
+          whileHover={{ scale: 1.1, rotate: 1 }}
+          whileTap={{ scale: 0.95, rotate: -1 }}
               >
                 Disconnect Wallet
-              </button>
+              </motion.button>
             )}
-            <button
+            <motion.button
               onClick={downloadWalletCard}
-              className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg pixel-font neon-border transition-all duration-300 w-full max-w-xs mt-4"
+              className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold py-3 px-6 rounded-full pixel-font transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg hover:from-cyan-500 hover:to-blue-500"
+              whileHover={{ scale: 1.1, rotate: 1 }}
+              whileTap={{ scale: 0.95, rotate: -1 }}
             >
               Download Wallet Card
-            </button>
+            </motion.button>
           </div>
         </div>
       ) : (
@@ -233,12 +240,14 @@ export default function Profile() {
               className="mt-2 text-white pixel-font text-sm sm:text-base w-full"
             />
           </div>
-          <button
+          <motion.button
             onClick={handleSave}
-            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg pixel-font neon-border transition-all duration-300 w-full"
+            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-6 rounded-full pixel-font transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg hover:from-pink-500 hover:to-purple-500"
+          whileHover={{ scale: 1.1, rotate: 1 }}
+          whileTap={{ scale: 0.95, rotate: -1 }}
           >
             Save Changes
-          </button>
+          </motion.button>
         </div>
       )}
     </div>
