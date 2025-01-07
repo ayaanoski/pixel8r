@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import BackgroundCollage from '../components/BackgroundCollage'
 import Confetti from 'react-confetti'
+import { motion } from 'framer-motion'
 
 
 export default function Pixelate() {
@@ -247,12 +248,14 @@ export default function Pixelate() {
                 Original size: {imageDimensions.width} x {imageDimensions.height}
               </div>
 
-              <button
+              <motion.button
                 onClick={downloadPixelatedImage}
-                className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg pixel-font neon-border transition-all duration-300 text-sm sm:text-base mb-6"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-6 rounded-full pixel-font transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg hover:from-pink-500 hover:to-purple-500"
+                whileHover={{ scale: 1.1, rotate: 1 }}
+                whileTap={{ scale: 0.95, rotate: -1 }}
               >
                 Download Pixelated Image
-              </button>
+              </motion.button>
             </div>
           )}
         </div>
