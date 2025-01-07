@@ -126,23 +126,24 @@ export default function Home() {
 
       <div className="space-y-4 relative z-10">
         <Link href="/pixelate" className="block">
-          <motion.button
-            className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg pixel-font transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Get Started
-          </motion.button>
-        </Link>
-        <Link href="/marketplace" className="block">
-          <motion.button
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg pixel-font transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Marketplace
-          </motion.button>
-        </Link>
+            <motion.button
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-6 rounded-full pixel-font transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg hover:from-pink-500 hover:to-purple-500"
+              whileHover={{ scale: 1.1, rotate: 1 }}
+              whileTap={{ scale: 0.95, rotate: -1 }}
+            >
+              Get Started
+            </motion.button>
+          </Link>
+          <Link href="/marketplace" className="block">
+            <motion.button
+              className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold py-3 px-6 rounded-full pixel-font transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg hover:from-cyan-500 hover:to-blue-500"
+              whileHover={{ scale: 1.1, rotate: 1 }}
+              whileTap={{ scale: 0.95, rotate: -1 }}
+            >
+              Marketplace
+            </motion.button>
+          </Link>
+
       </div>
 
       <motion.div
