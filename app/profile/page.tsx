@@ -163,12 +163,12 @@ export default function Profile() {
                 )}
               </div>
             ) : (
-              <motion.button
+                <motion.button
                 onClick={disconnectWallet}
                 className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-6 rounded-full pixel-font transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg hover:from-pink-500 hover:to-purple-500"
-          whileHover={{ scale: 1.1, rotate: 1 }}
-          whileTap={{ scale: 0.95, rotate: -1 }}
-              >
+                whileHover={{ scale: 1.1, rotate: 1 }}
+                whileTap={{ scale: 0.95, rotate: -1 }}
+                >
                 Disconnect Wallet
               </motion.button>
             )}
