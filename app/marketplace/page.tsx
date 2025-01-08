@@ -103,7 +103,7 @@ export default function Marketplace() {
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900 text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4 pixel-font mt-12 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
+          <h1 className="text-4xl sm:text-5xl font-bold mb-4 pixel-font mt-36 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
             NFT Marketplace
           </h1>
           <p className="text-gray-300 pixel-font text-sm sm:text-base">Collect Unique Digital Art</p>
