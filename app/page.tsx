@@ -222,7 +222,7 @@ export default function Home() {
         transition={{ duration: 0.8 }}
       >
         <motion.h1
-          className="text-5xl md:text-7xl font-bold mb-4 pixel-font text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"
+          className="text-5xl md:text-7xl mt-36 font-bold mb-2 pixel-font text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"
           whileHover={{ scale: 1.05 }}
         >
           Welcome to Pixel8r
