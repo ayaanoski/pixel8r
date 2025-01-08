@@ -4,13 +4,14 @@ Pixel8r is a decentralized NFT creation and marketplace platform built using Nex
 
 ## Live Demo: https://pixel8r.vercel.app
 
-![image](https://github.com/user-attachments/assets/588936aa-59ba-4c2f-884d-16f3b5be3c5b)
+![image](https://github.com/user-attachments/assets/0854d020-6474-4f9e-86e7-8408e5c5d4a7)
 
-![image](https://github.com/user-attachments/assets/e57a132e-f2e1-4171-84bb-55ebc747c4a8)
+![image](https://github.com/user-attachments/assets/00be1263-6bef-41db-a19e-d4a202474fd6)
 
-![image](https://github.com/user-attachments/assets/48d7673d-678e-4253-a6d1-3f87b7f34db8)
+![image](https://github.com/user-attachments/assets/8c86b092-e036-4565-8e01-2493760db823)
 
-![image](https://github.com/user-attachments/assets/6672dbae-e544-4d12-8371-656fdf8f5dc8)
+![image](https://github.com/user-attachments/assets/fb3eb5eb-9752-41b9-859a-07f8f4fc20a4)
+
 
 
 ## Features
