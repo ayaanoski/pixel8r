@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Sparkles } from 'lucide-react'
 
 interface NFT {
   id: number
@@ -85,13 +86,13 @@ const baseNFTs = [
     description: "Cowabunga! A heroic half-shell warrior brings retro gaming vibes to the blockchain, pizza not included.",
     image: "/assets/nft/12.png"
   }
-]
+]// Your existing NFT data
 
 export default function Marketplace() {
   const [nfts, setNfts] = useState<NFT[]>([])
+  const [hoveredId, setHoveredId] = useState<number | null>(null)
 
   useEffect(() => {
-    // Generate prices on the client side only
     const nftsWithPrices = baseNFTs.map(nft => ({
       ...nft,
       price: parseFloat((Math.random() * 10 + 0.1).toFixed(2))
@@ -100,61 +101,100 @@ export default function Marketplace() {
   }, [])
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 pixel-font">NFT Marketplace</h1>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900 text-white">
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold mb-4 pixel-font mt-20 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
+            NFT Marketplace
+          </h1>
+          <p className="text-gray-300 pixel-font">Collect Unique Digital Art</p>
+        </div>
 
-      <div className="flex justify-between mb-8">
-        <Link
-          href="/my-collection"
-          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded pixel-font transition-colors duration-300"
-        >
-          My Collection
-        </Link>
-        <Link
-          href="/nft-maker"
-          className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded pixel-font transition-colors duration-300"
-        >
-          Make Your Own
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {nfts.map((nft) => (
-          <div 
-            key={nft.id} 
-            className="border rounded-lg p-4 shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-blue-500 flex flex-col h-[450px]"
+        <div className="flex justify-center gap-6 mb-12">
+          <Link
+            href="/my-collection"
+            className="group relative px-6 py-3 overflow-hidden rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 pixel-font"
           >
-            <div className="relative w-full h-48 mb-4">
-              <Image
-                src={nft.image}
-                alt={nft.name}
-                fill
-                priority={nft.id === 1}
-                className="object-cover rounded-lg"
-              />
+            <div className="absolute inset-0 w-3 bg-white transition-all duration-[250ms] ease-out group-hover:w-full opacity-10"></div>
+            <div className="relative flex items-center gap-2">
+              <Sparkles size={16} />
+              <span>My Collection</span>
             </div>
-            
-            <h2 className="text-xl font-bold mb-2 pixel-font">{nft.name}</h2>
-            
-            <p className="text-gray-600 mb-4 pixel-font line-clamp-3">{nft.description}</p>
-            
-            <div className="mt-auto">
-              <div className="border-t pt-4">
-                <div className="flex justify-between items-center">
-                  <p className="text-lg font-bold pixel-font">
-                    {nft.price ? `${nft.price} TLOS` : 'Loading...'}
-                  </p>
-                  <Link
-                    href={`/marketplace/${nft.id}`}
-                    className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded pixel-font transition-colors duration-300"
-                  >
-                    Buy NFT
-                  </Link>
+          </Link>
+          
+          <Link
+            href="/nft-maker"
+            className="group relative px-6 py-3 overflow-hidden rounded-xl bg-gradient-to-r from-green-500 to-green-600 pixel-font"
+          >
+            <div className="absolute inset-0 w-3 bg-white transition-all duration-[250ms] ease-out group-hover:w-full opacity-10"></div>
+            <div className="relative flex items-center gap-2">
+              <Sparkles size={16} />
+              <span>Make Your Own</span>
+            </div>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {nfts.map((nft) => (
+            <div 
+              key={nft.id}
+              className="group relative"
+              onMouseEnter={() => setHoveredId(nft.id)}
+              onMouseLeave={() => setHoveredId(null)}
+            >
+              <div 
+                className={`
+                  relative bg-gray-900 rounded-2xl p-4 
+                  transform transition-all duration-300 ease-out
+                  hover:scale-105 hover:-rotate-1
+                  border border-gray-800 hover:border-purple-500
+                  ${hoveredId === nft.id ? 'shadow-2xl shadow-purple-500/20' : 'shadow-xl'}
+                `}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                
+                <div className="relative w-full h-48 mb-4 transform group-hover:scale-105 transition-transform duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl" />
+                  <Image
+                    src={nft.image}
+                    alt={nft.name}
+                    fill
+                    priority={nft.id === 1}
+                    className="object-cover rounded-xl"
+                  />
+                </div>
+                
+                <h2 className="text-xl font-bold mb-2 pixel-font bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
+                  {nft.name}
+                </h2>
+                
+                <p className="text-gray-400 pixel-font text-sm line-clamp-3 mb-4">
+                  {nft.description}
+                </p>
+                
+                <div className="border-t border-gray-800 pt-4 mt-auto">
+                  <div className="flex items-center justify-between">
+                    <div className="pixel-font">
+                      <p className="text-sm text-gray-400">Current Price</p>
+                      <p className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
+                        {nft.price ? `${nft.price} TLOS` : 'Loading...'}
+                      </p>
+                    </div>
+                    
+                    <Link
+                      href={`/marketplace/${nft.id}`}
+                      className="relative px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl pixel-font 
+                        transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25"
+                    >
+                      <div className="absolute inset-0 bg-white opacity-0 hover:opacity-10 rounded-xl transition-opacity" />
+                      <span>Buy NFT</span>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   )
