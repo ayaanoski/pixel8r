@@ -181,7 +181,7 @@ export default function NFTMarketplace() {
   }, [id])
 
   const handleBuyNFT = () => {
-    alert(`Processing purchase of ${nft?.name} for ${nft?.price} TLOS`)
+    alert(`not enough $TLOS to buy ${nft?.name} for ${nft?.price} TLOS`)
   }
 
   const handleDownloadPDF = async () => {
