@@ -2,9 +2,138 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { motion, useMotionValue, useSpring, useTransform, useAnimationControls, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
 
+// Welcome Animation Component
+const WelcomeAnimation = ({ onComplete }) => {
+  const controls = useAnimationControls();
+  
+  useEffect(() => {
+    const animate = async () => {
+      // Initial zoom and rotation
+      await controls.start({
+        scale: [0.5, 1.2, 1],
+        rotate: [0, 360],
+        opacity: [0, 0.8, 0.8],
+        transition: {
+          duration: 1.5,
+          times: [0, 0.7, 1],
+          ease: "easeInOut",
+        }
+      });
+
+      // Floating effect with pixel scatter
+      await controls.start({
+        y: [0, -20, 0],
+        rotateY: [0, 15, 0],
+        transition: {
+          duration: 1,
+          ease: "easeInOut",
+        }
+      });
+
+      // Final fade out
+      await controls.start({
+        scale: 1.5,
+        opacity: 0,
+        transition: {
+          duration: 0.5,
+          ease: "easeOut",
+        }
+      });
+
+      // Call onComplete callback
+      onComplete?.();
+    };
+
+    animate();
+  }, [controls, onComplete]);
+
+  return (
+    <motion.div
+      className="fixed inset-0 flex items-center justify-center bg-black z-50"
+      initial={{ opacity: 1 }}
+      animate={controls}
+    >
+      <div className="relative w-64 h-64">
+        {/* Glowing background effect */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-purple-500/50 to-pink-500/50 rounded-full blur-xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            repeatType: "reverse",
+          }}
+        />
+
+        {/* Pixel scatter effect */}
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-sm"
+            initial={{
+              opacity: 0,
+              x: 0,
+              y: 0,
+              rotate: 0,
+            }}
+            animate={{
+              opacity: [0, 1, 0],
+              x: Math.cos(i * 18) * 100,
+              y: Math.sin(i * 18) * 100,
+              rotate: 180,
+              scale: [0, 1, 0],
+            }}
+            transition={{
+              duration: 2,
+              delay: i * 0.05,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+
+        {/* Main logo */}
+        <motion.div
+          className="relative w-full h-full"
+          style={{
+            perspective: "1000px",
+          }}
+        >
+          <Image
+            src="/assets/pixel-logo.png"
+            alt="Pixel8r Logo"
+            fill
+            className="object-contain drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]"
+            priority
+          />
+        </motion.div>
+
+        {/* Pixel grid overlay */}
+        <motion.div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(rgba(168,85,247,0.15) 1px, transparent 1px)`,
+            backgroundSize: '8px 8px',
+          }}
+          animate={{
+            opacity: [0.1, 0.3, 0.1],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+          }}
+        />
+      </div>
+    </motion.div>
+  );
+};
+
+// Typewriter Text Component
 const TypewriterText = ({ text }) => {
   const [displayText, setDisplayText] = useState('')
   const [index, setIndex] = useState(0)
@@ -33,6 +162,7 @@ const TypewriterText = ({ text }) => {
   )
 }
 
+// Particle Effect Component
 const ParticleEffect = () => {
   const [particles, setParticles] = useState([])
 
@@ -74,6 +204,7 @@ const ParticleEffect = () => {
   )
 }
 
+// Card3D Component
 const Card3D = ({ step, index, description }) => {
   const x = useMotionValue(0)
   const y = useMotionValue(0)
@@ -165,6 +296,7 @@ const Card3D = ({ step, index, description }) => {
   )
 }
 
+// Background Collage Component
 const BackgroundCollage = () => {
   const [images, setImages] = useState([])
 
@@ -205,86 +337,94 @@ const BackgroundCollage = () => {
 
       <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/70 to-black/90" />
       
-      <div className="absolute inset-0 opacity-20 mix-blend-overlay animate-grain"  />
+      <div className="absolute inset-0 opacity-20 mix-blend-overlay animate-grain" />
     </div>
   )
 }
 
+// Main Home Component
 export default function Home() {
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [showContent, setShowContent] = useState(false);
+
+  const handleAnimationComplete = () => {
+    setShowWelcome(false);
+    setShowContent(true);
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center relative overflow-hidden bg-black">
-      <BackgroundCollage />
+    <>
+      {showWelcome && <WelcomeAnimation onComplete={handleAnimationComplete} />}
       
       <motion.div
-        className="relative z-10 mt-20"
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
+        className="flex flex-col items-center justify-center min-h-screen text-center relative overflow-hidden bg-black"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: showContent ? 1 : 0 }}
+        transition={{ duration: 0.5 }}
       >
-        <motion.h1
-          className="text-5xl md:text-7xl mt-36 font-bold mb-2 pixel-font text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"
-          whileHover={{ scale: 1.05 }}
+        <BackgroundCollage />
+        
+        <motion.div
+          className="relative z-10 mt-20"
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: showContent ? 1 : 0, y: showContent ? 0 : -50 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Welcome to Pixel8r
-        </motion.h1>
+          <motion.h1
+            className="text-5xl md:text-7xl mt-36 font-bold mb-2 pixel-font text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"
+            whileHover={{ scale: 1.05 }}
+          >
+            Welcome to Pixel8r
+          </motion.h1>
+
+          <motion.div
+            className="text-lg md:text-xl mb-12 pixel-font text-gray-300"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <TypewriterText text="Transform your photos into awesome 8-bit pixelated art!" />
+          </motion.div>
+        </motion.div>
+
+        <div className="space-y-6 relative z-10">
+          <Link href="/pixelate">
+            <motion.button
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-8 rounded-full pixel-font 
+                       shadow-[0_0_15px_rgba(168,85,247,0.5)] transition-all duration-300"
+              whileHover={{ scale: 1.05, boxShadow: "0 0 25px rgba(168,85,247,0.7)" }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Get Started
+              </motion.button>
+          </Link>
+        </div>
 
         <motion.div
-          className="text-lg md:text-xl mb-12 pixel-font text-gray-300"
+          className="mt-16 relative z-10 w-full px-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <TypewriterText text="Transform your photos into awesome 8-bit pixelated art!" />
+          <h2 className="text-2xl md:text-3xl font-bold mb-12 pixel-font text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+            How It Works
+          </h2>
+          <div className="flex flex-wrap justify-center gap-8 md:gap-12">
+            {[
+              { step: 'Upload', desc: 'Choose your image to begin the transformation' },
+              { step: 'Pixelate', desc: 'Watch your image transform into stunning pixel art' },
+              { step: 'Mint NFT', desc: 'Create your unique digital collectible' }
+            ].map((item, index) => (
+              <Card3D
+                key={item.step}
+                step={item.step}
+                index={index}
+                description={item.desc}
+              />
+            ))}
+          </div>
         </motion.div>
       </motion.div>
-
-      <div className="space-y-6 relative z-10">
-        <Link href="/pixelate">
-          <motion.button
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-8 rounded-full pixel-font 
-                     shadow-[0_0_15px_rgba(168,85,247,0.5)] transition-all duration-300"
-            whileHover={{ scale: 1.05, boxShadow: "0 0 25px rgba(168,85,247,0.7)" }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Get Started
-          </motion.button>
-        </Link>
-        <Link href="/marketplace">
-          <motion.button
-            className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold py-4 px-8 rounded-full pixel-font 
-                     shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300"
-            whileHover={{ scale: 1.05, boxShadow: "0 0 25px rgba(59,130,246,0.7)" }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Marketplace
-          </motion.button>
-        </Link>
-      </div>
-
-      <motion.div
-        className="mt-16 relative z-10 w-full px-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
-        <h2 className="text-2xl md:text-3xl font-bold mb-12 pixel-font text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-          How It Works
-        </h2>
-        <div className="flex flex-wrap justify-center gap-8 md:gap-12">
-          {[
-            { step: 'Upload', desc: 'Choose your image to begin the transformation' },
-            { step: 'Pixelate', desc: 'Watch your image transform into stunning pixel art' },
-            { step: 'Mint NFT', desc: 'Create your unique digital collectible' }
-          ].map((item, index) => (
-            <Card3D
-              key={item.step}
-              step={item.step}
-              index={index}
-              description={item.desc}
-            />
-          ))}
-        </div>
-      </motion.div>
-    </div>
+    </>
   )
 }
