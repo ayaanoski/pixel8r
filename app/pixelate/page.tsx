@@ -59,74 +59,107 @@ export default function Pixelate() {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
   
-      // Set canvas dimensions
       canvas.width = img.width;
       canvas.height = img.height;
-  
-      // Draw the image
       ctx.drawImage(img, 0, 0, img.width, img.height);
   
-      // Scale down for pixelation
-      const pixelSize = Math.max(Math.floor(Math.min(img.width, img.height) / 80), 4); // Adjust for smaller pixels
+      // Reduced pixel size for finer detail
+      const pixelSize = Math.max(Math.floor(Math.min(img.width, img.height) / 150), 2); // Changed from 80 to 150 and minimum from 4 to 2
+  
       const tempCanvas = document.createElement('canvas');
       const tempCtx = tempCanvas.getContext('2d');
   
-      // Temporary canvas for downscaling
       tempCanvas.width = img.width / pixelSize;
       tempCanvas.height = img.height / pixelSize;
+      
+      // Apply contrast enhancement before pixelation
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      // Enhance contrast
+      const contrast = 1.2; // Increased contrast factor (1 is normal, >1 increases contrast)
+      const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+      
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] = factor * (data[i] - 128) + 128; // Red
+        data[i + 1] = factor * (data[i + 1] - 128) + 128; // Green
+        data[i + 2] = factor * (data[i + 2] - 128) + 128; // Blue
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
   
-      // Draw scaled-down image
+      // Draw contrast-enhanced image to temp canvas
       tempCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
   
-      // Scale it back up
-      ctx.imageSmoothingEnabled = false; // Disable smoothing for sharp pixels
+      ctx.imageSmoothingEnabled = false;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, canvas.width, canvas.height);
   
-      // Reduce color palette
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
+      // Enhanced color palette with more natural colors
       const palette = [
-        [0, 0, 0], [34, 32, 52], [69, 40, 60], [102, 57, 49], [143, 86, 59],
-        [223, 113, 38], [217, 160, 102], [238, 195, 154], [251, 242, 54],
-        [153, 229, 80], [106, 190, 48], [55, 148, 110], [75, 105, 47],
-        [82, 75, 36], [50, 60, 57], [63, 63, 116], [48, 96, 130],
-        [91, 110, 225], [99, 155, 255], [95, 205, 228], [203, 219, 252],
-      ]; // Inspired by retro palettes
+        [0, 0, 0],       // Black
+        [34, 32, 52],    // Dark Purple
+        [69, 40, 60],    // Dark Mauve
+        [102, 57, 49],   // Brown
+        [143, 86, 59],   // Light Brown
+        [223, 113, 38],  // Orange
+        [217, 160, 102], // Tan
+        [238, 195, 154], // Skin
+        [251, 242, 54],  // Yellow
+        [153, 229, 80],  // Light Green
+        [106, 190, 48],  // Green
+        [55, 148, 110],  // Teal
+        [75, 105, 47],   // Dark Green
+        [82, 75, 36],    // Dark Brown
+        [50, 60, 57],    // Dark Gray
+        [63, 63, 116],   // Purple
+        [48, 96, 130],   // Blue Gray
+        [91, 110, 225],  // Blue
+        [99, 155, 255],  // Light Blue
+        [95, 205, 228],  // Sky Blue
+        [203, 219, 252], // Light Sky Blue
+        [255, 255, 255]  // White (added)
+      ];
+
+      const imageData2 = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data2 = imageData2.data;
   
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
+      // Improved color matching algorithm with weighted components
+      for (let i = 0; i < data2.length; i += 4) {
+        const r = data2[i];
+        const g = data2[i + 1];
+        const b = data2[i + 2];
   
-        // Find the nearest palette color
         let nearestColor = palette[0];
         let minDist = Infinity;
+        
         for (const color of palette) {
-          const dist = Math.pow(r - color[0], 2) + Math.pow(g - color[1], 2) + Math.pow(b - color[2], 2);
+          // Weighted distance calculation (human eye is more sensitive to green)
+          const dist = 
+            Math.pow(r - color[0], 2) * 0.3 + 
+            Math.pow(g - color[1], 2) * 0.59 + 
+            Math.pow(b - color[2], 2) * 0.11;
+            
           if (dist < minDist) {
             minDist = dist;
             nearestColor = color;
           }
         }
   
-        // Apply the nearest palette color
-        data[i] = nearestColor[0];
-        data[i + 1] = nearestColor[1];
-        data[i + 2] = nearestColor[2];
+        data2[i] = nearestColor[0];
+        data2[i + 1] = nearestColor[1];
+        data2[i + 2] = nearestColor[2];
       }
   
-      // Update the canvas with reduced color image
-      ctx.putImageData(imageData, 0, 0);
+      ctx.putImageData(imageData2, 0, 0);
   
-      // Set pixelated image and show confetti
       setPixelatedImage(canvas.toDataURL());
       setShowConfetti(true);
       setIsProcessing(false);
       setTimeout(() => setShowConfetti(false), 5000);
     };
     img.src = originalImage;
-  };
+};
   
 
   const getResponsiveDimensions = () => {
