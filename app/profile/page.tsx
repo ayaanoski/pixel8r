@@ -131,9 +131,9 @@ export default function Profile() {
   return (
     <div className="flex flex-col items-center p-4 sm:p-8 max-w-4xl mx-auto">
       <BackgroundCollage />
-      <h1 className="text-3xl mt-36 sm:text-4xl font-bold mb-4 sm:mb-8 pixel-font neon-text">Profile</h1>
+      <h1 className="text-3xl mt-36 sm:text-4xl font-bold mb-4 sm:mb-2 pixel-font neon-text">Profile</h1>
       {!isEditing ? (
-        <div className="w-full max-w-2xl mt-8 sm:mt-20">
+        <div className="w-full max-w-2xl mt-4 sm:mt-10">
           <WalletCard
             ref={walletCardRef}
             username={username}
