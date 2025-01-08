@@ -50,50 +50,84 @@ export default function Pixelate() {
     setSliderPosition(Number(e.target.value))
   }
 
-  const pixelateImage = () => {
-    if (!originalImage || !canvasRef.current) return
-    setIsProcessing(true)
-
-    const img = new window.Image()
+  const pixelateImageTo8Bit = () => {
+    if (!originalImage || !canvasRef.current) return;
+    setIsProcessing(true);
+  
+    const img = new window.Image();
     img.onload = () => {
-      const canvas = canvasRef.current
-      const ctx = canvas.getContext('2d')
-
-      canvas.width = img.width
-      canvas.height = img.height
-
-      ctx.drawImage(img, 0, 0, img.width, img.height)
-
-      const pixelSize = Math.max(Math.floor(Math.min(img.width, img.height) / 100), 5)
-      
-      for (let y = 0; y < img.height; y += pixelSize) {
-        for (let x = 0; x < img.width; x += pixelSize) {
-          const pixelData = ctx.getImageData(x, y, pixelSize, pixelSize)
-          let r = 0, g = 0, b = 0, count = 0
-          
-          for (let i = 0; i < pixelData.data.length; i += 4) {
-            r += pixelData.data[i]
-            g += pixelData.data[i + 1]
-            b += pixelData.data[i + 2]
-            count++
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+  
+      // Set canvas dimensions
+      canvas.width = img.width;
+      canvas.height = img.height;
+  
+      // Draw the image
+      ctx.drawImage(img, 0, 0, img.width, img.height);
+  
+      // Scale down for pixelation
+      const pixelSize = Math.max(Math.floor(Math.min(img.width, img.height) / 80), 4); // Adjust for smaller pixels
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+  
+      // Temporary canvas for downscaling
+      tempCanvas.width = img.width / pixelSize;
+      tempCanvas.height = img.height / pixelSize;
+  
+      // Draw scaled-down image
+      tempCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+  
+      // Scale it back up
+      ctx.imageSmoothingEnabled = false; // Disable smoothing for sharp pixels
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, canvas.width, canvas.height);
+  
+      // Reduce color palette
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      const palette = [
+        [0, 0, 0], [34, 32, 52], [69, 40, 60], [102, 57, 49], [143, 86, 59],
+        [223, 113, 38], [217, 160, 102], [238, 195, 154], [251, 242, 54],
+        [153, 229, 80], [106, 190, 48], [55, 148, 110], [75, 105, 47],
+        [82, 75, 36], [50, 60, 57], [63, 63, 116], [48, 96, 130],
+        [91, 110, 225], [99, 155, 255], [95, 205, 228], [203, 219, 252],
+      ]; // Inspired by retro palettes
+  
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+  
+        // Find the nearest palette color
+        let nearestColor = palette[0];
+        let minDist = Infinity;
+        for (const color of palette) {
+          const dist = Math.pow(r - color[0], 2) + Math.pow(g - color[1], 2) + Math.pow(b - color[2], 2);
+          if (dist < minDist) {
+            minDist = dist;
+            nearestColor = color;
           }
-          
-          r = Math.floor(r / count)
-          g = Math.floor(g / count)
-          b = Math.floor(b / count)
-          
-          ctx.fillStyle = `rgb(${r}, ${g}, ${b})`
-          ctx.fillRect(x, y, pixelSize, pixelSize)
         }
+  
+        // Apply the nearest palette color
+        data[i] = nearestColor[0];
+        data[i + 1] = nearestColor[1];
+        data[i + 2] = nearestColor[2];
       }
-
-      setPixelatedImage(canvas.toDataURL())
-      setShowConfetti(true)
-      setIsProcessing(false)
-      setTimeout(() => setShowConfetti(false), 5000)
-    }
-    img.src = originalImage
-  }
+  
+      // Update the canvas with reduced color image
+      ctx.putImageData(imageData, 0, 0);
+  
+      // Set pixelated image and show confetti
+      setPixelatedImage(canvas.toDataURL());
+      setShowConfetti(true);
+      setIsProcessing(false);
+      setTimeout(() => setShowConfetti(false), 5000);
+    };
+    img.src = originalImage;
+  };
+  
 
   const getResponsiveDimensions = () => {
     if (typeof window === 'undefined') return { width: 0, height: 0 }
@@ -305,7 +339,7 @@ export default function Pixelate() {
               className="mb-8"
             >
               <motion.button
-                onClick={pixelateImage}
+                onClick={pixelateImageTo8Bit}
                 disabled={isProcessing}
                 className={`
                   flex items-center space-x-2 
