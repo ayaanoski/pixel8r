@@ -101,7 +101,7 @@ export default function Marketplace() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-blue-900 text-white">
+    <div className="min-h-screen flex flex-col items-center p-4 sm:p-8 max-w-4xl mx-auto bg-gradient-to-br from-purple-900 via-black to-blue-900 text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold mb-4 pixel-font mt-20 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
