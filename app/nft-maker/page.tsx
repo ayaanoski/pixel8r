@@ -69,7 +69,7 @@ export default function NFTMaker() {
       <motion.h1
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="text-5xl mt-20 font-bold text-center pixel-font text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 pt-20 mb-12"
+        className="text-5xl mt-36 font-bold text-center pixel-font text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 pt-20 mb-12"
       >
         Create Your NFT
         <Sparkles className="inline-block ml-4 text-purple-400" />
