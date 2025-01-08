@@ -217,7 +217,7 @@ export default function Pixelate() {
           className="relative z-10 w-full flex flex-col items-center"
         >
           <motion.h1 
-            className="text-3xl sm:text-4xl lg:text-5xl mt-20 font-bold mb-4 pixel-font text-center max-w-[90vw]"
+            className="text-3xl sm:text-4xl lg:text-5xl mt-36 font-bold mb-4 pixel-font text-center max-w-[90vw]"
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             transition={{
