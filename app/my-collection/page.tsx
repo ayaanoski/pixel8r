@@ -19,7 +19,7 @@ export default function MyCollection() {
   return (
     <div className="container mx-auto px-4">
       <BackgroundCollage />
-      <h1 className="text-4xl sm:text-5xl font-bold mb-4 pixel-font mt-36 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">My NFT Collection</h1>
+      <h1 className="text-4xl sm:text-5xl font-bold mb-4 pixel-font mt-48 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">My NFT Collection</h1>
       {isLoading ? (
         <p className="text-center mt-10 pixel-font">Loading your NFTs...</p>
       ) : (
