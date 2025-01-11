@@ -469,7 +469,7 @@ export default function Home() {
           <h2 className="text-2xl md:text-3xl font-bold mb-12 pixel-font text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
             How It Works
           </h2>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-12">
+          <div className="flex flex-wrap justify-center gap-8 md:gap-12 mb-20">
             {[
               { step: 'Upload', desc: 'Choose your image to begin the transformation' },
               { step: 'Pixelate', desc: 'Watch your image transform into stunning pixel art' },
