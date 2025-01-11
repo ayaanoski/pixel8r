@@ -5,130 +5,190 @@ import Image from 'next/image'
 import { motion, useMotionValue, useSpring, useTransform, useAnimationControls, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
 
-// Welcome Animation Component
 const WelcomeAnimation = ({ onComplete }) => {
   const controls = useAnimationControls();
+  const [isMounted, setIsMounted] = useState(false);
   
   useEffect(() => {
+    setIsMounted(true);
+    
     const animate = async () => {
-      // Initial zoom and rotation
-      await controls.start({
-        scale: [0.5, 1.2, 1],
-        rotate: [0, 360],
-        opacity: [0, 0.8, 0.8],
-        transition: {
-          duration: 1.5,
-          times: [0, 0.7, 1],
-          ease: "easeInOut",
-        }
-      });
-
-      // Floating effect with pixel scatter
-      await controls.start({
-        y: [0, -20, 0],
-        rotateY: [0, 15, 0],
-        transition: {
-          duration: 1,
-          ease: "easeInOut",
-        }
-      });
-
-      // Final fade out
-      await controls.start({
-        scale: 1.5,
-        opacity: 0,
-        transition: {
-          duration: 0.5,
-          ease: "easeOut",
-        }
-      });
-
-      // Call onComplete callback
+      await controls.start("logoEmergence");
+      await controls.start("pixelExplosion");
+      await controls.start("exit");
       onComplete?.();
     };
 
     animate();
   }, [controls, onComplete]);
 
+  // Generate fixed positions for particles
+  const particles = Array.from({ length: 20 }, (_, i) => ({
+    offset: i * (100 / 20), // Evenly space particles
+    delay: i * 0.1,
+  }));
+
   return (
     <motion.div
       className="fixed inset-0 flex items-center justify-center bg-black z-50"
       initial={{ opacity: 1 }}
-      animate={controls}
     >
-      <div className="relative w-64 h-64">
-        {/* Glowing background effect */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-purple-500/50 to-pink-500/50 rounded-full blur-xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.6, 0.3],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
-        />
+      {/* Background particles */}
+      {isMounted && (
+        <div className="absolute inset-0 overflow-hidden">
+          {particles.map((particle, i) => (
+            <motion.div
+              key={`particle-${i}`}
+              className="absolute w-1 h-1 bg-purple-500"
+              initial={{ 
+                x: `${particle.offset}%`,
+                y: -10,
+                opacity: 0
+              }}
+              animate={{
+                y: ['0%', '100%'],
+                opacity: [0, 0.5, 0],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "linear",
+                delay: particle.delay,
+              }}
+            />
+          ))}
+        </div>
+      )}
 
-        {/* Pixel scatter effect */}
-        {[...Array(20)].map((_, i) => (
+      {/* Main logo container */}
+      <motion.div
+        className="relative w-64 h-64"
+        variants={{
+          logoEmergence: {
+            scale: [0, 1.2, 1],
+            rotateY: [0, 720],
+            opacity: 1,
+            transition: {
+              duration: 2,
+              ease: "easeOut"
+            }
+          },
+          pixelExplosion: {
+            scale: 1
+          },
+          exit: {
+            scale: [1, 1.5],
+            opacity: 0,
+            transition: {
+              duration: 0.8,
+              ease: "easeInOut"
+            }
+          }
+        }}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={controls}
+      >
+        {/* Geometric shapes */}
+        {[0, 1, 2].map((i) => (
           <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-sm"
-            initial={{
-              opacity: 0,
-              x: 0,
-              y: 0,
-              rotate: 0,
+            key={`shape-${i}`}
+            className="absolute inset-0"
+            style={{
+              border: '2px solid',
+              borderColor: i === 0 ? 'rgba(168,85,247,0.3)' : 
+                         i === 1 ? 'rgba(236,72,153,0.3)' : 
+                         'rgba(139,92,246,0.3)',
+              borderRadius: '20%',
             }}
             animate={{
-              opacity: [0, 1, 0],
-              x: Math.cos(i * 18) * 100,
-              y: Math.sin(i * 18) * 100,
-              rotate: 180,
-              scale: [0, 1, 0],
+              rotate: [i * 30, (i + 1) * 360],
+              scale: [1, 1.2, 1],
             }}
             transition={{
-              duration: 2,
-              delay: i * 0.05,
-              ease: "easeInOut",
+              duration: 3,
+              repeat: Infinity,
+              ease: "linear"
             }}
           />
         ))}
 
-        {/* Main logo */}
-        <motion.div
-          className="relative w-full h-full"
-          style={{
-            perspective: "1000px",
-          }}
-        >
+        {/* Pixel scatter elements */}
+        {isMounted && Array.from({ length: 40 }, (_, i) => (
+          <motion.div
+            key={`pixel-${i}`}
+            className="absolute w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400"
+            style={{
+              left: '50%',
+              top: '50%',
+              borderRadius: (i % 2) === 0 ? '50%' : '0%',
+            }}
+            animate={{
+              x: [(i % 2 === 0 ? -1 : 1) * (100 + (i % 5) * 50),
+                  0,
+                  (i % 2 === 0 ? 1 : -1) * (100 + (i % 5) * 50)],
+              y: [(i % 3 === 0 ? -1 : 1) * (100 + (i % 4) * 50),
+                  0,
+                  (i % 3 === 0 ? 1 : -1) * (100 + (i % 4) * 50)],
+              opacity: [0, 0.8, 0],
+              scale: [0, 1, 0],
+            }}
+            transition={{
+              duration: 2 + (i % 3),
+              repeat: Infinity,
+              repeatType: "reverse",
+              delay: i * 0.05,
+            }}
+          />
+        ))}
+
+        {/* Main logo with glow */}
+        <motion.div className="relative w-full h-full" style={{ perspective: "1000px" }}>
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full blur-xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+          />
+          
           <Image
             src="/assets/pixel-logo.png"
             alt="Pixel8r Logo"
             fill
-            className="object-contain drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]"
+            className="object-contain drop-shadow-[0_0_25px_rgba(168,85,247,0.7)]"
             priority
           />
         </motion.div>
 
-        {/* Pixel grid overlay */}
-        <motion.div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `radial-gradient(rgba(168,85,247,0.15) 1px, transparent 1px)`,
-            backgroundSize: '8px 8px',
-          }}
-          animate={{
-            opacity: [0.1, 0.3, 0.1],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-          }}
-        />
-      </div>
+        {/* Orbital particles */}
+        {isMounted && Array.from({ length: 12 }, (_, i) => (
+          <motion.div
+            key={`orbital-${i}`}
+            className="absolute w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-400 to-pink-400"
+            style={{
+              left: '50%',
+              top: '50%',
+              transform: `rotate(${i * 30}deg) translateX(80px)`,
+            }}
+            animate={{
+              rotate: [i * 30, i * 30 + 360],
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "linear",
+              delay: i * 0.1,
+            }}
+          />
+        ))}
+      </motion.div>
     </motion.div>
   );
 };
