@@ -5,7 +5,7 @@
 What sets **Pixel8r** apart? **It makes digital art copyright-proof.** By subtly altering each pixel’s composition, the platform ensures every artwork is **one-of-a-kind and immune to copyright claims**. Your creations remain **unique, secure, and truly yours** — down to the last pixel.
 
 ## Live Demo: https://pixel8r.vercel.app
-## Live Demo with AI AGENT : https://pixel8r-with-ai-agent.vercel.app
+## Live Demo with AI AGENT : https://pixel8r2.vercel.app
 
 ![image](https://github.com/user-attachments/assets/0854d020-6474-4f9e-86e7-8408e5c5d4a7)
 
