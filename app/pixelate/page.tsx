@@ -1,10 +1,17 @@
-'use client'
+"use client"
 
-import { useState, useRef, useEffect } from 'react'
-import BackgroundCollage from '../components/BackgroundCollage'
-import Confetti from 'react-confetti'
-import { motion } from 'framer-motion'
-import { Sparkles, Wand2 } from 'lucide-react'
+import { useState, useRef, useEffect } from "react"
+import BackgroundCollage from "../components/BackgroundCollage"
+import Confetti from "react-confetti"
+import { motion } from "framer-motion"
+import { Download, ImageIcon, Settings, Sparkles, Wand2 } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Slider } from "@/components/ui/slider"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export default function Pixelate() {
   const [originalImage, setOriginalImage] = useState(null)
@@ -16,6 +23,10 @@ export default function Pixelate() {
   const [isProcessing, setIsProcessing] = useState(false)
   const canvasRef = useRef(null)
   const sliderRef = useRef(null)
+  const [pixelSize, setPixelSize] = useState(8)
+  const [saturation, setSaturation] = useState(1.2)
+  const [contrast, setContrast] = useState(1.1)
+  const [smoothing, setSmoothing] = useState(true)
 
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0]
@@ -40,9 +51,9 @@ export default function Pixelate() {
     setOriginalImage(null)
     setPixelatedImage(null)
     setImageDimensions({ width: 0, height: 0 })
-    const fileInput = document.getElementById('imageUpload')
+    const fileInput = document.getElementById("imageUpload")
     if (fileInput) {
-      fileInput.value = ''
+      fileInput.value = ""
     }
   }
 
@@ -51,171 +62,162 @@ export default function Pixelate() {
   }
 
   const pixelateImageTo8Bit = () => {
-    if (!originalImage || !canvasRef.current) return;
-    setIsProcessing(true);
-  
-    const img = new window.Image();
-    img.onload = () => {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-  
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0, img.width, img.height);
-  
-      // Reduced pixel size for finer detail
-      const pixelSize = Math.max(Math.floor(Math.min(img.width, img.height) / 150), 2); // Changed from 80 to 150 and minimum from 4 to 2
-  
-      const tempCanvas = document.createElement('canvas');
-      const tempCtx = tempCanvas.getContext('2d');
-  
-      tempCanvas.width = img.width / pixelSize;
-      tempCanvas.height = img.height / pixelSize;
-      
-      // Apply contrast enhancement before pixelation
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      
-      // Enhance contrast
-      const contrast = 1.2; // Increased contrast factor (1 is normal, >1 increases contrast)
-      const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-      
-      for (let i = 0; i < data.length; i += 4) {
-        data[i] = factor * (data[i] - 128) + 128; // Red
-        data[i + 1] = factor * (data[i + 1] - 128) + 128; // Green
-        data[i + 2] = factor * (data[i + 2] - 128) + 128; // Blue
-      }
-      
-      ctx.putImageData(imageData, 0, 0);
-  
-      // Draw contrast-enhanced image to temp canvas
-      tempCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
-  
-      ctx.imageSmoothingEnabled = false;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, canvas.width, canvas.height);
-  
-      // Enhanced color palette with more natural colors
-      const palette = [
-        [0, 0, 0],       // Black
-        [34, 32, 52],    // Dark Purple
-        [69, 40, 60],    // Dark Mauve
-        [102, 57, 49],   // Brown
-        [143, 86, 59],   // Light Brown
-        [223, 113, 38],  // Orange
-        [217, 160, 102], // Tan
-        [238, 195, 154], // Skin
-        [251, 242, 54],  // Yellow
-        [153, 229, 80],  // Light Green
-        [106, 190, 48],  // Green
-        [55, 148, 110],  // Teal
-        [75, 105, 47],   // Dark Green
-        [82, 75, 36],    // Dark Brown
-        [50, 60, 57],    // Dark Gray
-        [63, 63, 116],   // Purple
-        [48, 96, 130],   // Blue Gray
-        [91, 110, 225],  // Blue
-        [99, 155, 255],  // Light Blue
-        [95, 205, 228],  // Sky Blue
-        [203, 219, 252], // Light Sky Blue
-        [255, 255, 255]  // White (added)
-      ];
+    if (!originalImage || !canvasRef.current) return
+    setIsProcessing(true)
 
-      const imageData2 = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data2 = imageData2.data;
-  
-      // Improved color matching algorithm with weighted components
-      for (let i = 0; i < data2.length; i += 4) {
-        const r = data2[i];
-        const g = data2[i + 1];
-        const b = data2[i + 2];
-  
-        let nearestColor = palette[0];
-        let minDist = Infinity;
-        
-        for (const color of palette) {
-          // Weighted distance calculation (human eye is more sensitive to green)
-          const dist = 
-            Math.pow(r - color[0], 2) * 0.3 + 
-            Math.pow(g - color[1], 2) * 0.59 + 
-            Math.pow(b - color[2], 2) * 0.11;
-            
-          if (dist < minDist) {
-            minDist = dist;
-            nearestColor = color;
+    const img = new window.Image()
+    img.onload = () => {
+      const canvas = canvasRef.current
+      const ctx = canvas.getContext("2d", { willReadFrequently: true })
+      if (!ctx) return
+
+      // Set canvas dimensions
+      canvas.width = img.width
+      canvas.height = img.height
+
+      // Draw original image
+      ctx.drawImage(img, 0, 0, img.width, img.height)
+
+      // Get image data
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const data = imageData.data
+
+      // Create temporary canvas for processing
+      const tempCanvas = document.createElement("canvas")
+      const tempCtx = tempCanvas.getContext("2d")
+      if (!tempCtx) return
+
+      tempCanvas.width = canvas.width
+      tempCanvas.height = canvas.height
+      tempCtx.drawImage(canvas, 0, 0)
+
+      // Calculate pixel block size based on image dimensions
+      const pixelBlockSize = pixelSize
+
+      // Process image in blocks
+      for (let y = 0; y < canvas.height; y += pixelBlockSize) {
+        for (let x = 0; x < canvas.width; x += pixelBlockSize) {
+          let r = 0,
+            g = 0,
+            b = 0,
+            a = 0,
+            count = 0
+
+          // Average colors in the block
+          for (let py = 0; py < pixelBlockSize && y + py < canvas.height; py++) {
+            for (let px = 0; px < pixelBlockSize && x + px < canvas.width; px++) {
+              const i = ((y + py) * canvas.width + (x + px)) * 4
+              r += data[i]
+              g += data[i + 1]
+              b += data[i + 2]
+              a += data[i + 3]
+              count++
+            }
           }
+
+          // Calculate average color
+          r = Math.round(r / count)
+          g = Math.round(g / count)
+          b = Math.round(b / count)
+          a = Math.round(a / count)
+
+          // Enhance colors
+          const saturationFactor = saturation
+          const contrastFactor = contrast
+
+          // Apply contrast
+          r = ((r / 255 - 0.5) * contrastFactor + 0.5) * 255
+          g = ((g / 255 - 0.5) * contrastFactor + 0.5) * 255
+          b = ((b / 255 - 0.5) * contrastFactor + 0.5) * 255
+
+          // Apply saturation
+          const gray = (r + g + b) / 3
+          r = gray + (r - gray) * saturationFactor
+          g = gray + (g - gray) * saturationFactor
+          b = gray + (b - gray) * saturationFactor
+
+          // Clamp values
+          r = Math.max(0, Math.min(255, Math.round(r)))
+          g = Math.max(0, Math.min(255, Math.round(g)))
+          b = Math.max(0, Math.min(255, Math.round(b)))
+
+          // Fill the pixel block with the enhanced average color
+          ctx.fillStyle = `rgba(${r},${g},${b},${a / 255})`
+          ctx.fillRect(x, y, pixelBlockSize, pixelBlockSize)
         }
-  
-        data2[i] = nearestColor[0];
-        data2[i + 1] = nearestColor[1];
-        data2[i + 2] = nearestColor[2];
       }
-  
-      ctx.putImageData(imageData2, 0, 0);
-  
-      setPixelatedImage(canvas.toDataURL());
-      setShowConfetti(true);
-      setIsProcessing(false);
-      setTimeout(() => setShowConfetti(false), 5000);
-    };
-    img.src = originalImage;
-};
-  
+
+      // Apply slight smoothing for better quality
+      if (smoothing) {
+        ctx.imageSmoothingEnabled = true
+        ctx.imageSmoothingQuality = "high"
+      } else {
+        ctx.imageSmoothingEnabled = false
+      }
+
+      setPixelatedImage(canvas.toDataURL())
+      setShowConfetti(true)
+      setIsProcessing(false)
+      setTimeout(() => setShowConfetti(false), 5000)
+    }
+
+    img.src = originalImage
+  }
 
   const getResponsiveDimensions = () => {
-    if (typeof window === 'undefined') return { width: 0, height: 0 }
-    
+    if (typeof window === "undefined") return { width: 0, height: 0 }
+
     const screenWidth = window.innerWidth
     const padding = screenWidth < 640 ? 32 : 64
     const maxWidth = Math.min(imageDimensions.width, screenWidth - padding)
     const aspectRatio = imageDimensions.height / imageDimensions.width
     const height = maxWidth * aspectRatio
-    
+
     const maxHeight = window.innerHeight * 0.6
     if (height > maxHeight) {
       return {
         width: maxHeight / aspectRatio,
-        height: maxHeight
+        height: maxHeight,
       }
     }
-    
+
     return { width: maxWidth, height }
   }
 
   const downloadPixelatedImage = () => {
     if (pixelatedImage) {
-      const link = document.createElement('a')
+      const link = document.createElement("a")
       link.href = pixelatedImage
-      link.download = 'pixelated_image.png'
+      link.download = "pixelated_image.png"
       link.click()
     }
   }
 
   const features = [
-    { 
-      icon: '🎨',
-      text: 'Upload HD quality images',
-      color: 'from-cyan-500 to-blue-500',
-      description: 'Support for high-resolution images up to 4K'
+    {
+      icon: "🎨",
+      text: "Upload HD quality images",
+      color: "from-cyan-500 to-blue-500",
+      description: "Support for high-resolution images up to 4K",
     },
     {
-      icon: '🚀',
-      text: 'Perfect for NFT art',
-      color: 'from-purple-500 to-indigo-500',
-      description: 'Create unique digital collectibles'
+      icon: "🚀",
+      text: "Perfect for NFT art",
+      color: "from-purple-500 to-indigo-500",
+      description: "Create unique digital collectibles",
     },
     {
-      icon: '✨',
-      text: 'Maintain crisp edges',
-      color: 'from-yellow-400 to-orange-500',
-      description: 'Advanced pixel-perfect algorithms'
+      icon: "✨",
+      text: "Maintain crisp edges",
+      color: "from-yellow-400 to-orange-500",
+      description: "Advanced pixel-perfect algorithms",
     },
     {
-      icon: '🎮',
-      text: 'Add retro gaming vibes',
-      color: 'from-pink-500 to-rose-500',
-      description: '8-bit style transformations'
-    }
+      icon: "🎮",
+      text: "Add retro gaming vibes",
+      color: "from-pink-500 to-rose-500",
+      description: "8-bit style transformations",
+    },
   ]
 
   const responsiveDimensions = getResponsiveDimensions()
@@ -229,12 +231,12 @@ export default function Pixelate() {
           recycle={false}
           numberOfPieces={200}
           gravity={0.3}
-          colors={['#4ade80', '#60a5fa', '#f472b6', '#fbbf24']}
+          colors={["#4ade80", "#60a5fa", "#f472b6", "#fbbf24"]}
         />
       )}
-      
+
       <div className="relative flex flex-col items-center px-4 py-6 sm:p-8 max-w-6xl mx-auto">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -243,20 +245,20 @@ export default function Pixelate() {
           <BackgroundCollage />
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="relative z-10 w-full flex flex-col items-center"
         >
-          <motion.h1 
+          <motion.h1
             className="text-3xl sm:text-4xl lg:text-5xl mt-36 font-bold mb-4 pixel-font text-center max-w-[90vw]"
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             transition={{
               type: "spring",
               stiffness: 260,
-              damping: 20
+              damping: 20,
             }}
           >
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
@@ -264,7 +266,7 @@ export default function Pixelate() {
             </span>
           </motion.h1>
 
-          <motion.div 
+          <motion.div
             className="w-full sm:w-auto mb-12"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -274,7 +276,7 @@ export default function Pixelate() {
               Transform your NFT masterpieces into 8-bit art
               <motion.span
                 animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
                 className="ml-2"
               >
                 <Sparkles className="w-6 h-6 text-yellow-400" />
@@ -294,105 +296,206 @@ export default function Pixelate() {
                 onHoverStart={() => setHoveredCard(index)}
                 onHoverEnd={() => setHoveredCard(null)}
               >
-                <div className={`
+                <div
+                  className={`
                   h-full p-6 rounded-xl
                   bg-gradient-to-br ${feature.color}
                   transform transition-all duration-300
-                  group-hover:shadow-2xl group-hover:shadow-${feature.color.split('-')[1]}/50
+                  group-hover:shadow-2xl group-hover:shadow-${feature.color.split("-")[1]}/50
                   relative z-10 backdrop-blur-sm bg-opacity-20
                   border border-white/20
-                `}>
+                `}
+                >
                   <div className="flex flex-col items-center space-y-3">
                     <span className="text-3xl">{feature.icon}</span>
-                    <h3 className="pixel-font text-white text-center">
-                      {feature.text}
-                    </h3>
-                    <p className="text-sm text-white/80 text-center">
-                      {feature.description}
-                    </p>
+                    <h3 className="pixel-font text-white text-center">{feature.text}</h3>
+                    <p className="text-sm text-white/80 text-center">{feature.description}</p>
                   </div>
                 </div>
-                
-                <div className={`
+
+                <div
+                  className={`
                   absolute inset-0 rounded-xl
                   bg-gradient-to-br ${feature.color}
                   transform translate-y-1 translate-x-1
                   -z-10 opacity-50 blur-sm
                   transition-transform duration-300
                   group-hover:translate-y-2 group-hover:translate-x-2
-                `}/>
+                `}
+                />
               </motion.div>
             ))}
           </div>
 
-          <motion.div 
-            className="w-full max-w-md mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <div className="bg-gray-800/50 p-6 rounded-xl backdrop-blur-sm border border-white/10">
-              <label
-                htmlFor="imageUpload"
-                className="block mb-3 pixel-font text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500"
-              >
-                Upload Your Image:
-              </label>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <input
-                  id="imageUpload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="w-full px-4 py-2 bg-gray-700/50 rounded-lg pixel-font text-white text-sm
-                    border border-white/10 focus:border-green-400/50 transition-all duration-300
-                    file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
-                    file:text-sm file:font-semibold file:pixel-font
-                    file:bg-green-400 file:text-gray-900
-                    hover:file:bg-green-500"
-                />
-                {originalImage && (
-                  <motion.button
-                    onClick={handleCancelUpload}
-                    className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg pixel-font transition-all duration-300"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Cancel
-                  </motion.button>
-                )}
-              </div>
-            </div>
-          </motion.div>
+          <TooltipProvider>
+            <Card className="w-full max-w-2xl mb-8 bg-gray-800/50 backdrop-blur-sm border-white/10">
+              <CardContent className="p-6">
+                <Tabs defaultValue="upload" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 bg-gray-700/50">
+                    <TabsTrigger value="upload" className="pixel-font text-sm">
+                      <ImageIcon className="w-4 h-4 mr-2" />
+                      Upload
+                    </TabsTrigger>
+                    <TabsTrigger value="settings" className="pixel-font text-sm">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Settings
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="upload" className="mt-4">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="flex-1">
+                        <Label
+                          htmlFor="imageUpload"
+                          className="block mb-3 pixel-font text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500"
+                        >
+                          Upload Your Image:
+                        </Label>
+                        <input
+                          id="imageUpload"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="w-full px-4 py-2 bg-gray-700/50 rounded-lg pixel-font text-white text-sm
+                            border border-white/10 focus:border-green-400/50 transition-all duration-300
+                            file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
+                            file:text-sm file:font-semibold file:pixel-font
+                            file:bg-green-400 file:text-gray-900
+                            hover:file:bg-green-500"
+                        />
+                      </div>
+                      {originalImage && (
+                        <Button
+                          onClick={handleCancelUpload}
+                          variant="destructive"
+                          className="pixel-font text-sm"
+                        >
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="settings" className="mt-4 space-y-4">
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <Label className="pixel-font text-sm text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
+                            Pixel Size: {pixelSize}px
+                          </Label>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <div className="text-xs text-muted-foreground">ℹ️</div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Larger values create bigger pixels</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <Slider
+                          value={[pixelSize]}
+                          onValueChange={(value) => setPixelSize(value[0])}
+                          min={2}
+                          max={32}
+                          step={1}
+                          className="pixel-slider"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <Label className="pixel-font text-sm text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
+                            Color Saturation: {(saturation * 100).toFixed(0)}%
+                          </Label>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <div className="text-xs text-muted-foreground">ℹ️</div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Enhance color vibrancy</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <Slider
+                          value={[saturation * 100]}
+                          onValueChange={(value) => setSaturation(value[0] / 100)}
+                          min={50}
+                          max={200}
+                          step={5}
+                          className="pixel-slider"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <Label className="pixel-font text-sm text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
+                            Contrast: {(contrast * 100).toFixed(0)}%
+                          </Label>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <div className="text-xs text-muted-foreground">ℹ️</div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Adjust image contrast</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <Slider
+                          value={[contrast * 100]}
+                          onValueChange={(value) => setContrast(value[0] / 100)}
+                          min={50}
+                          max={150}
+                          step={5}
+                          className="pixel-slider"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="smoothing"
+                            checked={smoothing}
+                            onCheckedChange={setSmoothing}
+                          />
+                          <Label
+                            htmlFor="smoothing"
+                            className="pixel-font text-sm text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500"
+                          >
+                            Edge Smoothing
+                          </Label>
+                        </div>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <div className="text-xs text-muted-foreground">ℹ️</div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Smooth pixel edges</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </TooltipProvider>
 
           {originalImage && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
-            >
-              <motion.button
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+              <Button
                 onClick={pixelateImageTo8Bit}
                 disabled={isProcessing}
-                className={`
-                  flex items-center space-x-2 
-                  bg-gradient-to-r from-green-400 to-blue-500
-                  text-white font-bold py-3 px-6 rounded-lg 
-                  pixel-font transition-all duration-300
-                  hover:from-blue-500 hover:to-green-400
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                `}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                size="lg"
+                className="pixel-font bg-gradient-to-r from-green-400 to-blue-500 hover:from-blue-500 hover:to-green-400"
               >
-                <Wand2 className="w-6 h-6" />
-                <span>{isProcessing ? 'Processing...' : 'Pixelate Image'}</span>
-              </motion.button>
+                <Wand2 className="w-5 h-5 mr-2" />
+                {isProcessing ? "Processing..." : "Pixelate Image"}
+              </Button>
             </motion.div>
           )}
 
           {originalImage && pixelatedImage && (
-            <motion.div 
+            <motion.div
               className="w-full flex flex-col items-center space-y-4 px-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -403,7 +506,7 @@ export default function Pixelate() {
                 style={{
                   width: `${responsiveDimensions.width}px`,
                   height: `${responsiveDimensions.height}px`,
-                  maxWidth: '100%',
+                  maxWidth: "100%",
                 }}
               >
                 <div
@@ -411,17 +514,17 @@ export default function Pixelate() {
                   style={{
                     width: `${sliderPosition}%`,
                     backgroundImage: `url(${originalImage})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'left',
-                    borderRight: '2px solid #4ade80'
+                    backgroundSize: "cover",
+                    backgroundPosition: "left",
+                    borderRight: "2px solid #4ade80",
                   }}
                 />
                 <div
                   className="h-full w-full"
                   style={{
                     backgroundImage: `url(${pixelatedImage})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'left'
+                    backgroundSize: "cover",
+                    backgroundPosition: "left",
                   }}
                 />
                 <input
@@ -441,16 +544,15 @@ export default function Pixelate() {
                 Original size: {imageDimensions.width} x {imageDimensions.height}
               </div>
 
-              <motion.button
+              <Button
                 onClick={downloadPixelatedImage}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-6 rounded-full pixel-font 
-                  transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl
-                  hover:from-pink-500 hover:to-purple-500 flex items-center space-x-2"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                variant="outline"
+                size="lg"
+                className="pixel-font bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 border-0"
               >
-                <span>Download Pixelated Image</span>
-              </motion.button>
+                <Download className="w-5 h-5 mr-2" />
+                Download Pixelated Image
+              </Button>
             </motion.div>
           )}
         </motion.div>
@@ -498,9 +600,15 @@ export default function Pixelate() {
                       0 0 20px rgba(74, 222, 128, 0.2),
                       0 0 30px rgba(74, 222, 128, 0.1);
         }
+        .pixel-slider [role="slider"] {
+          @apply w-4 h-4 border-2 border-primary;
+        }
+        .pixel-slider [role="slider"]:focus {
+          @apply ring-2 ring-primary ring-offset-2;
+        }
       `}</style>
 
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
+      <canvas ref={canvasRef} style={{ display: "none" }} />
     </div>
   )
 }
