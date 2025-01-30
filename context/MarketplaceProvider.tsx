@@ -11,6 +11,7 @@ interface NFTListing {
   tokenURI: string | null;
   seller?: string;
   nftAddress?: string;
+  isListed: boolean;
 }
 
 interface MarketplaceContextType {
@@ -173,7 +174,8 @@ export const MarketplaceProvider: React.FC<MarketplaceProviderProps> = ({ childr
               price: "0", // Default price for owned NFTs not listed
               tokenURI,
               nftAddress: NFT_CONTRACT_ADDRESS,
-              seller: account // Current account is the owner
+              seller: account, // Current account is the owner
+              isListed: false
             });
           }
         } catch (error) {
@@ -387,7 +389,8 @@ export const MarketplaceProvider: React.FC<MarketplaceProviderProps> = ({ childr
         signer
       );
   
-      const listings = await marketplaceContract.getActiveListings();
+      const listings = await marketplaceContract.getAllListings();
+      console.log("LISTINGS::", listings)
   
       const formattedListings: NFTListing[] = await Promise.all(
         listings.map(async (listing: any, index: number) => {
@@ -397,13 +400,17 @@ export const MarketplaceProvider: React.FC<MarketplaceProviderProps> = ({ childr
           } catch (error) {
             console.error(`Error fetching data for token index ${index}:`, error);
           }
+
+          console.log(listing[4])
   
           return {
             tokenId: index.toString(),
             price: ethers.formatEther(listing.price),
             seller: listing.seller,
             nftAddress: NFT_CONTRACT_ADDRESS,
-            tokenURI: tokenURI
+            tokenURI: tokenURI,
+            isListed: listing[4]
+           
           };
         })
       );
