@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useEffect } from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { useMarketplaceContext } from "@/context/MarketplaceProvider"
 import { formatIPFSUrl } from "@/lib/ipfs"
 import { NFT_CONTRACT_ADDRESS } from "@/constants"
@@ -11,6 +12,7 @@ import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 
 const SingleNft = ({ id }) => {
+  const router = useRouter()
   const { getSingleNFTData, isLoading, buyNFT, account } = useMarketplaceContext()
   const [nft, setNft] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -57,6 +59,7 @@ const SingleNft = ({ id }) => {
     try {
       await buyNFT(nft.nftAddress, id, nft.price.toString())
       alert("Purchase successful!")
+      router.push("/marketplace")
     } catch (error) {
       console.error("Error buying NFT:", error)
       alert("Failed to purchase NFT. Please try again.")

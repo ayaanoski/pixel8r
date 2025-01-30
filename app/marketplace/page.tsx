@@ -8,6 +8,7 @@ import { useMarketplaceContext } from "@/context/MarketplaceProvider"
 import { formatIPFSUrl } from "@/lib/ipfs"
 import { motion } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useRouter } from "next/navigation"
 
 interface NFT {
   tokenId: string | number
@@ -32,6 +33,7 @@ export default function Marketplace() {
   const [buyingNFT, setBuyingNFT] = useState<string | number | null>(null)
 
   const { account, connectWallet, isLoading: isLoadingWallet, getAllListings, buyNFT } = useMarketplaceContext()
+  const router = useRouter()
 
   useEffect(() => {
     const fetchNFTs = async () => {
@@ -255,88 +257,96 @@ export default function Marketplace() {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
           >
             {filteredNfts.map((nft, index) => (
-              <motion.div
+              <div
+                onClick={() => router.push(`/marketplace/${nft.tokenId.toString()}`)}
                 key={nft.tokenId}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="group relative"
-                onMouseEnter={() => setHoveredId(nft.tokenId)}
-                onMouseLeave={() => setHoveredId(null)}
+                className="block group relative cursor-pointer"
               >
-                <div
-                  className={`relative bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 transform transition-all duration-300 ease-out
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="group relative"
+                  onMouseEnter={() => setHoveredId(nft.tokenId)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
+                  <div
+                    className={`relative bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 transform transition-all duration-300 ease-out
                     hover:scale-105 hover:-rotate-1 hover:bg-gray-900/90
                     border border-gray-800 hover:border-purple-500/50
                     ${hoveredId === nft.tokenId ? "shadow-2xl shadow-purple-500/30" : "shadow-xl"}
                     before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-r before:from-purple-500/5 before:to-pink-500/5 before:opacity-0 before:transition-opacity hover:before:opacity-100`}
-                >
-                  {!nft.isListed && (
-                    <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md z-20">
-                      Not for Sale
-                    </div>
-                  )}
-                  {nft.seller.toLowerCase() === account.toLowerCase() && (
-                    <div className="absolute top-4 right-4 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md z-20">
-                      You own this!
-                    </div>
-                  )}
-                  <div className="relative w-full h-48 sm:h-56 mb-6 transform group-hover:scale-105 transition-transform duration-300 rounded-xl overflow-hidden ring-1 ring-white/10">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl" />
-                    <Image
-                      src={nft.image || "/placeholder.svg"}
-                      alt={nft.name}
-                      fill
-                      priority={index < 6}
-                      className="object-cover rounded-xl"
-                    />
-                  </div>
-
-                  <h2 className="text-xl sm:text-2xl font-bold mb-3 pixel-font bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300 truncate">
-                    {nft.name}
-                  </h2>
-
-                  <p className="text-gray-400 pixel-font text-sm sm:text-base line-clamp-3 mb-6 h-18">
-                    {nft.description}
-                  </p>
-
-                  <div className="border-t border-gray-800 pt-6 mt-auto">
-                    <div className="flex flex-col justify-between gap-4">
-                      <div className="pixel-font">
-                        <p className="text-xs sm:text-sm text-gray-400">Current Price</p>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <div className="flex items-center cursor-pointer">
-                                <p className="text-2xl sm:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 truncate max-w-[160px] hover:scale-105 transition-transform">
-                                  {nft.isListed ? `${truncatePrice(nft.price)} TLOS` : "N/A"}
-                                </p>
-                                <Info size={18} className="ml-2 text-gray-400 transition-all duration-300" />
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                {nft.isListed ? "This NFT is available for purchase." : "This NFT is not for sale."}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                  >
+                    {!nft.isListed && (
+                      <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md z-20">
+                        Not for Sale
                       </div>
+                    )}
+                    {nft.seller.toLowerCase() === account.toLowerCase() && (
+                      <div className="absolute top-4 right-4 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md z-20">
+                        You own this!
+                      </div>
+                    )}
+                    <div className="relative w-full h-48 sm:h-56 mb-6 transform group-hover:scale-105 transition-transform duration-300 rounded-xl overflow-hidden ring-1 ring-white/10">
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl" />
+                      <Image
+                        src={nft.image || "/placeholder.svg"}
+                        alt={nft.name}
+                        fill
+                        priority={index < 6}
+                        className="object-cover rounded-xl"
+                      />
+                    </div>
 
-                      {/* Buy Now Button */}
-                      {nft.isListed && nft.seller.toLowerCase() !== account.toLowerCase() && (
-                        <Link
-                          href={`/marketplace/${nft.tokenId.toString()}`}
-                          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:-translate-y-0.5"
-                        >
-                          <ShoppingCart size={18} />
-                          <span>Buy Now</span>
-                        </Link>
-                      )}
+                    <h2 className="text-xl sm:text-2xl font-bold mb-3 pixel-font bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300 truncate">
+                      {nft.name}
+                    </h2>
+
+                    <p className="text-gray-400 pixel-font text-sm sm:text-base line-clamp-3 mb-6 h-18">
+                      {nft.description}
+                    </p>
+
+                    <div className="border-t border-gray-800 pt-6 mt-auto">
+                      <div className="flex flex-col justify-between gap-4">
+                        <div className="pixel-font">
+                          <p className="text-xs sm:text-sm text-gray-400">Current Price</p>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <div className="flex items-center cursor-pointer">
+                                  <p className="text-2xl sm:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 truncate max-w-[160px] hover:scale-105 transition-transform">
+                                    {nft.isListed ? `${truncatePrice(nft.price)} TLOS` : "N/A"}
+                                  </p>
+                                  <Info size={18} className="ml-2 text-gray-400 transition-all duration-300" />
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>
+                                  {nft.isListed ? "This NFT is available for purchase." : "This NFT is not for sale."}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+
+                        {/* Buy Now Button */}
+                        {nft.isListed && nft.seller.toLowerCase() !== account.toLowerCase() && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              router.push(`/marketplace/${nft.tokenId.toString()}`)
+                            }}
+                            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:-translate-y-0.5"
+                          >
+                            <ShoppingCart size={18} />
+                            <span>Buy Now</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              </div>
             ))}
           </motion.div>
         )}
